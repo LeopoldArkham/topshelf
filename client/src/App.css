@@ -1,0 +1,36 @@
+html,body {
+  height: 100%;
+}
+#root {
+  height: 100%;
+}
+.App {
+  background-color: #e2edff;
+  height: 100%;
+}
+
+.container {
+  margin: 20px;  
+}
+
+ul {
+  list-style: none;
+  padding-left:10px;
+  padding-top:0;
+  
+}
+
+li {
+
+    list-style-position:inside;
+    background-color: #eff5ff;
+    padding: 3px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin-bottom: 5px;
+
+}
+
+a {
+  text-decoration: none;  
+}
