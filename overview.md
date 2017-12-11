@@ -27,18 +27,18 @@ To upgrade to a real database system, this file should be duplicated and its met
 ### Future development
 Here are the steps (in order of execution) I think should be taken next if this project was to be taken from prototype- to production-quality:
 
--**Tests:** A testing framework for the client side should be used to make development safer and faster.
--**Database:** The project should be updated to use a real database using the steps mentioned above. The testing framework would prevent regressions and bugs while reimplementing the endpoint handlers.
--**User login and Management**: See below for more.
--**UI:** The UI should be redesigned using a react-aware UI kit. I went back on my initial intention to use one right away as I realized that they may have a hidden learning curve and unduly complicate rapid iteration dureing early development.
--**Extra features:** 
-  - Auto-delete lists when they are empty
-  - Add a picture upload prompt when completing an item so that a photo of the receipt can be stored for items meant to be refunded.
-  - Enhance the recipe suggestion by finding recipes that use more than one item from the fridge, displaying the recipe thumbnails, and automatically creating lists from missing ingredients.
+- **Tests:** A testing framework for the client side should be used to make development safer and faster.
+- **Database:** The project should be updated to use a real database using the steps mentioned above. The testing framework would prevent regressions and bugs while reimplementing the endpoint handlers.
+- **User login and Management**: See below for more.
+- **UI:** The UI should be redesigned using a react-aware UI kit. I went back on my initial intention to use one right away as I realized that they may have a hidden learning curve and unduly complicate rapid iteration dureing early development.
+- **Extra features:** 
+    - Auto-delete lists when they are empty
+    - Add a picture upload prompt when completing an item so that a photo of the receipt can be stored for items meant to be refunded.
+    - Enhance the recipe suggestion by finding recipes that use more than one item from the fridge, displaying the recipe thumbnails, and automatically creating lists from missing ingredients.
 
-###Flaws
+### Flaws
 There are two main flaws in the systems as it stands:
 - **Mock backend:** I didn't use an object-heavy model for storing data in the dev backend in an attempt to imitate the table-oriented storage model of SQL. However, not having SQl's ability to robustly generate unique identifiers for items and keep track of clean relationships makes some of the backend code uglier than it should be, especiall with regards to the distinction between private and public data. Functions that contain a lot of unpleasant duplication of code are marked `@parallel` in the source.
--**User login:** For lack of time, I did away with any user login and verification. The code is user-aware, but makes no attempt to validate the origin of a given request. However, as user authentification is done via middleware and has minimal UI requirements, this could be implemented reasonably quickly.
+- **User login:** For lack of time, I did away with any user login and verification. The code is user-aware, but makes no attempt to validate the origin of a given request. However, as user authentification is done via middleware and has minimal UI requirements, this could be implemented reasonably quickly.
 
 Parts of the code would also benefit from some refactoring. Helper functions could be factored out in the backend, components could enforce a clearer separation between view components, controlled components and containers; the Groceries component should be broken down into smaller ones.
