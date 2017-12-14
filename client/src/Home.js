@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import get from "axios";
+import http from "./http.js"
 import { Link } from "react-router-dom";
 
 export default class Home extends Component {
@@ -13,12 +13,12 @@ export default class Home extends Component {
   }
 
   componentWillMount() {
-    get("http://localhost:3100/api/lists").then(result => {
+    http.get("/api/lists").then(result => {
       this.setState({
         publicLists: JSON.parse(result.data.lists)
       });
     });
-    get("http://localhost:3100/api/" + this.props.user + "/lists").then(result => {
+    http.get("/api/" + this.props.user + "/lists").then(result => {
       this.setState({
         privateLists: JSON.parse(result.data.lists)
       });

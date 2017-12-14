@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import {post} from "axios";
+import http from "./http.js"
+
 
 export default class Newlist extends Component {
   constructor(props) {
@@ -24,7 +25,7 @@ export default class Newlist extends Component {
     if (this.state.listName.length === 0) {
       return
     }
-    post("http://localhost:3100/api/newlist", {
+    http.post("/api/newlist", {
       isPrivate: this.state.isPrivate,
       listName: this.state.listName,
       user: this.props.user

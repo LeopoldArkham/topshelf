@@ -9,13 +9,14 @@
 var request = require("request");
 
 var users = ["Sam", "Richard", "Christopher"];
+var passwords = ["123", "qwerty", "wasd"];
 var private_lists = [[], [], ["B-day"]];
 var items_in_private_lists = [{}, {}, { 0: [item("Cake"), item("Whisky")] }];
 var spent = [0.0, 0.0, 0.0];
 var assigned = [[], [], []];
 var fridge = [item("Chicken"), item("Avocado")];
 
-var all_lists = [
+var public_lists = [
   "Main",
   "Christmas Dinner",
   "Lunch",
@@ -56,20 +57,36 @@ function toTitleCase(str) {
   }
 
 module.exports = {
+  findByUsername: function(username, cb) {
+    const user_idx = users.findIndex(_user => _user === username);
+    if (user_idx < 0) {
+      return cb(null, null);
+    } else {
+      return cb(null, {name: username, password: passwords[user_idx], id: user_idx});   
+    }
+  },
+  findById: function(id, cb) {
+      if (users[id]) {
+        cb(null, {name: users[id], password: passwords[id], id: id});
+      } else {
+        cb(new Error('User ' + id + ' does not exist'));
+      }
+  },
+  user: function (req, res) {
+    res.send(req.user.name);
+  },
   fridge: function(req, res) {
     res.json({ items: JSON.stringify(fridge) });
   },
   lists: function(req, res) {
-    res.json({ lists: JSON.stringify(all_lists) });
+    res.json({ lists: JSON.stringify(public_lists) });
   },
   spent: function(req, res) {
-    console.log("here");
     const user_idx = users.findIndex(_user => _user === req.params.user);
     res.send(spent[user_idx].toString().slice(0, 5));
   },
   privateLists: function(req, res) {
-    const user_idx = users.findIndex(_user => _user === req.params.user);
-    res.json({ lists: JSON.stringify(private_lists[user_idx]) });
+    res.json({ lists: JSON.stringify(private_lists[req.user.id]) });
   },
   list: function(req, res) {
     const id = req.params.id;
@@ -77,19 +94,15 @@ module.exports = {
   },
   privateList: function(req, res) {
     const id = req.params.id;
-    const user_idx = users.findIndex(_user => _user === req.params.user);
-    res.json({ items: JSON.stringify(items_in_private_lists[user_idx][id]) });
+    res.json({ items: JSON.stringify(items_in_private_lists[req.user.id][id]) });
   },
   assigned: function(req, res) {
-    const user = req.params.user;
-    const user_idx = users.findIndex(_user => _user === user);
-    console.log(assigned[user_idx]);
-    res.json({ items: JSON.stringify(assigned[user_idx]) });
+    res.json({ items: JSON.stringify(assigned[req.user.id]) });
   },
   assign: function(req, res, next) {
     const b = req.body;
     const list_idx = b.list_id;
-    const user_idx = users.findIndex(user => user === b.user);
+    const user_idx = req.user.id
     const item_idx = items_in_lists[list_idx].findIndex(
       item => item.name === b.itemName
     );
@@ -100,7 +113,6 @@ module.exports = {
   
     // Add it to the assigned list for this user
     assigned[user_idx].push([items_in_lists[list_idx][item_idx], list_idx]);
-    console.log(assigned[user_idx]);
   
     res.json({ items: JSON.stringify(items_in_lists[list_idx]) });
   },
@@ -108,7 +120,7 @@ module.exports = {
   complete: function(req, res, next) {
     const b = req.body;
     const list_idx = b.list_id;
-    const user_idx = users.findIndex(user => user === b.user);
+    const user_idx = req.user.id;
   
     if (b.isPrivate) {
       // Find the item in the enclosing list
@@ -118,7 +130,7 @@ module.exports = {
   
       // Update item status and place in the fridge
       items_in_private_lists[user_idx][list_idx][item_idx].status = "completed";
-      items_in_private_lists[user_idx][list_idx][item_idx].assignee = b.user;
+      items_in_private_lists[user_idx][list_idx][item_idx].assignee = req.user.name;
       items_in_private_lists[user_idx][list_idx][item_idx].price += b.price;
       fridge.push(items_in_private_lists[user_idx][list_idx][item_idx]);
   
@@ -140,7 +152,7 @@ module.exports = {
   
       // Update item status and place in the fridge
       items_in_lists[list_idx][item_idx].status = "completed";
-      items_in_lists[list_idx][item_idx].assignee = b.user;
+      items_in_lists[list_idx][item_idx].assignee = req.user.name;
       items_in_lists[list_idx][item_idx].price += b.price;
       fridge.push(items_in_lists[list_idx][item_idx]);
   
@@ -170,7 +182,7 @@ module.exports = {
   completeFromAssigned: function(req, res, next) {
     const b = req.body;
     const list_idx = b.origin;  
-    const user_idx = users.findIndex(user => user === b.user);
+    const user_idx = req.user.id;
     const item_idx = items_in_lists[list_idx].findIndex(
       item => item.name === b.itemName
     );
@@ -193,7 +205,7 @@ module.exports = {
   addItem: function(req, res, next) {
     const b = req.body;
     const list_idx = b.list_id;
-    const user_idx = users.findIndex(user => user === b.user);
+    const user_idx = req.user.id;
     const new_name = toTitleCase(b.item_name);
     var duplicate = false;
   
@@ -243,7 +255,7 @@ module.exports = {
     var url;
   
     if (b.isPrivate) {
-      const user_idx = users.findIndex(_user => _user === b.user);
+      const user_idx = req.user.id;
       const idx = private_lists[user_idx].push(b.listName) - 1;
       items_in_private_lists[user_idx][idx] = [];
   

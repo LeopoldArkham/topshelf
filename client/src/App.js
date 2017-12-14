@@ -6,6 +6,8 @@ import Home from "./Home.js";
 import Assigned from "./Assigned.js";
 import Fridge from "./Fridge.js";
 import Newlist from "./Newlist.js";
+import Login from "./Login.js";
+import http from "./http.js";
 import "./App.css";
 
 class App extends Component {
@@ -13,15 +15,36 @@ class App extends Component {
     super(props);
 
     this.state = {
-      user: "Christopher"
+      user: ""
     };
+  }
+
+  componentWillMount() {
+    http.get("/api/user").then(result => {
+      this.setState({ user: result.data });
+    });
   }
 
   render() {
     return (
       <Router>
         <div className="App">
-          <NavBar name={this.state.user} />
+        {/* @cleanup: Should be a  nested component */}
+          <Route path="/" exact render={routeProps => {
+              return <NavBar name={this.state.user} />;
+            }} />
+          <Route
+            path="/:any"
+            render={routeProps => {
+              console.log(routeProps.match);
+              if (routeProps.match.url !== "/login") {
+                return <NavBar name={this.state.user} />;
+              } else {
+                return null;
+              }
+            }}
+          />
+          <Route exact={true} path="/login" component={Login} />
           <Route exact={true} path="/fridge" component={Fridge} />
           <Route
             path="/"
@@ -48,14 +71,26 @@ class App extends Component {
             path="/lists/:id"
             exact={true}
             render={routeProps => {
-              return <Groceries user={this.state.user} private={false} {...routeProps} />;
+              return (
+                <Groceries
+                  user={this.state.user}
+                  private={false}
+                  {...routeProps}
+                />
+              );
             }}
           />
           <Route
             path="/:user/lists/:id"
             exact={true}
             render={routeProps => {
-              return <Groceries user={this.state.user} private={true} {...routeProps} />;
+              return (
+                <Groceries
+                  user={this.state.user}
+                  private={true}
+                  {...routeProps}
+                />
+              );
             }}
           />
         </div>

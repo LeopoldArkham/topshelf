@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {get, post} from "axios";
+import http from "./http.js"
 import ListItem from "./ListItem.js"
 
 
@@ -15,7 +15,7 @@ export default class Fridge extends Component {
 
   componentWillMount() {
     this.getSuggestions();
-    get("http://localhost:3100/api/fridge").then(result => {
+    http.get("/api/fridge").then(result => {
       this.setState({
         items: JSON.parse(result.data.items)
       });
@@ -23,7 +23,7 @@ export default class Fridge extends Component {
   }
 
   getSuggestions() {
-    get("http://localhost:3100/api/suggestions").then(result => {
+    http.get("/api/suggestions").then(result => {
       this.setState({
         suggestions: JSON.parse(result.data.recipes)
       });
@@ -32,8 +32,7 @@ export default class Fridge extends Component {
   }
 
   remove(e, idx) {
-    console.log(e.target.id);
-    post("http://localhost:3100/api/removeFromFridge", {
+    http.post("/api/removeFromFridge", {
       itemName: e.target.id
     }).then (result =>
     this.setState( {
@@ -60,7 +59,7 @@ export default class Fridge extends Component {
         {this.state.suggestions.map((s, idx) => {
           if (s) {
             return <li key={idx}><a href={s.source_url}>{s.title}</a></li>
-          }})}
+          } else {return null}})}
         </ul>
       </div>
     );

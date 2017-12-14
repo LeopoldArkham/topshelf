@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { get, post } from "axios";
+import http from "./http.js"
 import ListItem from "./ListItem.js";
 import ProgressBar from "./ProgressBar.js";
 
@@ -16,24 +16,22 @@ export default class Groceries extends Component {
     this.list_id = this.props.match.params.id;
     if (this.props.private) {
       this.endpoint =
-        "http://localhost:3100/api/" + this.props.user + "/lists/";
+        "/api/" + this.props.user + "/lists/";
     } else {
-      this.endpoint = "http://localhost:3100/api/lists/";
+      this.endpoint = "/api/lists/";
     }
   }
 
   componentWillMount() {
-    console.log("URL: ", this.endpoint + this.list_id);
-    get(this.endpoint + this.list_id).then(result =>
+    http.get(this.endpoint + this.list_id).then(result =>
       this.setState({
         items: JSON.parse(result.data.items)
       })
     );
-    console.log("Items: ", this.state.items);
   }
 
   pendingToAssigned(e) {
-    post("http://localhost:3100/api/item/assign", {
+    http.post("/api/item/assign", {
       list_id: this.list_id,
       itemName: e.target.id,
       user: this.props.user
@@ -46,7 +44,7 @@ export default class Groceries extends Component {
 
   completeItem(e) {
     const price = parseFloat(prompt("Price for " + e.target.id));
-    post("http://localhost:3100/api/item/complete", {
+    http.post("/api/item/complete", {
       list_id: this.list_id,
       itemName: e.target.id,
       user: this.props.user,
@@ -63,7 +61,7 @@ export default class Groceries extends Component {
   addItem(e) {
     e.preventDefault();
     if (this.state.newItem.length > 0) {
-      post("http://localhost:3100/api/addItem", {
+      http.post("/api/addItem", {
         list_id: this.list_id,
         item_name: this.state.newItem,
         qty: parseInt(this.state.qty, 10),

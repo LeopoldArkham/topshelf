@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {get, post} from "axios";
+import http from "./http.js"
 import ListItem from "./ListItem.js";
 
 export default class Assigned extends Component {
@@ -13,7 +13,7 @@ export default class Assigned extends Component {
   }
 
   componentWillMount() {
-    get("http://localhost:3100/api/" + this.props.user + "/assigned").then(
+    http.get("/api/" + this.props.user + "/assigned").then(
       result =>
         this.setState({
           items: JSON.parse(result.data.items)
@@ -23,7 +23,7 @@ export default class Assigned extends Component {
   }
 
   updateTotalSpent() {
-    get("http://localhost:3100/api/" + this.props.user + "/spent").then(
+    http.get("/api/" + this.props.user + "/spent").then(
       result =>
         this.setState({
           spent: JSON.parse(result.data)
@@ -33,7 +33,7 @@ export default class Assigned extends Component {
 
   assignedToCompleted(e) {
     const price = parseFloat(prompt("Price for " + e.target.attributes.id.value));    
-    post("http://localhost:3100/api/item/complete", {
+    http.post("/api/item/complete", {
       list_id: e.target.attributes.origin.value,
       itemName: e.target.attributes.id.value,
       user: this.props.user,
